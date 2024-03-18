@@ -82,11 +82,11 @@
 			<!--<version>2.11.0</version>--> <!-- versão Alex -->
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<!--<version>7.3.1</version>--> <!-- suporte PostgreSQL 9.5 -->
-		</dependency>
+			<version>7.3.1</version>
+		</dependency> -->
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
