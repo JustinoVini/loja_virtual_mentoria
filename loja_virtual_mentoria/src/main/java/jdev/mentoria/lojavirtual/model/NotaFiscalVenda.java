@@ -3,14 +3,10 @@ package jdev.mentoria.lojavirtual.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -25,16 +21,19 @@ public class NotaFiscalVenda implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_nota_fiscal_venda")
 	private Long id;
 
+	@Column(nullable = false)
 	private String numero;
 
+	@Column(nullable = false)
 	private String serie;
 
+	@Column(nullable = false)
 	private String tipo;
 
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "text", nullable = false)
 	private String xml;
 
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "text", nullable = false)
 	private String pdf;
 
 	public Long getId() {

@@ -2,6 +2,7 @@ package jdev.mentoria.lojavirtual.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -14,25 +15,29 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "item_venda_loja")
-@SequenceGenerator(name = "seq_item_venda_loja", sequenceName = "seq_item_venda_loja", allocationSize = 1, initialValue = 1)
+@Table(name = "avaliacao_produto")
+@SequenceGenerator(name = "seq_avaliacao_produto", sequenceName = "seq_avaliacao_produto", allocationSize = 1, initialValue = 1)
 public class AvaliacaoProduto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_item_venda_loja")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avaliacao_produto")
 	private Long id;
 
-	private Double quantidade;
+	@Column(nullable = false)
+	private Integer nota;
+
+	@Column(nullable = false)
+	private String descricao;
+
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
+	private Pessoa pessoa;
 
 	@ManyToOne
 	@JoinColumn(name = "produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
 	private Produto produto;
-
-	@ManyToOne
-	@JoinColumn(name = "venda_compra_loja_virtual_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compra_loja_virtual_fk"))
-	private VendaCompraLojaVirtual vendaCompraLojaVirtual;
 
 	public Long getId() {
 		return id;
@@ -42,12 +47,20 @@ public class AvaliacaoProduto implements Serializable {
 		this.id = id;
 	}
 
-	public Double getQuantidade() {
-		return quantidade;
+	public Integer getNota() {
+		return nota;
 	}
 
-	public void setQuantidade(Double quantidade) {
-		this.quantidade = quantidade;
+	public void setNota(Integer nota) {
+		this.nota = nota;
+	}
+
+	public Pessoa getPessoa() {
+		return pessoa;
+	}
+
+	public void setPessoa(Pessoa pessoa) {
+		this.pessoa = pessoa;
 	}
 
 	public Produto getProduto() {
@@ -58,12 +71,12 @@ public class AvaliacaoProduto implements Serializable {
 		this.produto = produto;
 	}
 
-	public VendaCompraLojaVirtual getVendaCompraLojaVirtual() {
-		return vendaCompraLojaVirtual;
+	public String getDescricao() {
+		return descricao;
 	}
 
-	public void setVendaCompraLojaVirtual(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
-		this.vendaCompraLojaVirtual = vendaCompraLojaVirtual;
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	@Override
