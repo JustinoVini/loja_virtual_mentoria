@@ -22,8 +22,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAutoConfiguration
 public class LojaVirtualMentoriaApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		SpringApplication.run(LojaVirtualMentoriaApplication.class, args);
+		// System.out.println(new BCryptPasswordEncoder().encode("admin"));
 	}
 
 }
