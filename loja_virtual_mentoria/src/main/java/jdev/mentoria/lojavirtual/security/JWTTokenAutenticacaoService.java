@@ -11,8 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 import jdev.mentoria.lojavirtual.ApplicationContextLoad;
 import jdev.mentoria.lojavirtual.model.Usuario;
 import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
@@ -21,91 +23,93 @@ import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
 @Service
 @Component
 public class JWTTokenAutenticacaoService {
-	
-		// Tempo de validade do TOKEN - 2 dias
-		private static final long EXPIRATION_TIME = 172800000;
 
-		// Senha única para compor a autenticação e ajudar na segurança
-		private static final String SECRET = "SenhaExtremamenteSecreta";
+	// Tempo de validade do TOKEN - 2 dias
+	private static final long EXPIRATION_TIME = 172800000;
 
-		// Prefixo padrão de Token
-		private static final String TOKEN_PREFIX = "Bearer";
+	// Senha única para compor a autenticação e ajudar na segurança
+	private static final String SECRET = "SenhaExtremamenteSecreta";
 
-		private static final String HEADER_STRING = "Authorization";
+	// Prefixo padrão de Token
+	private static final String TOKEN_PREFIX = "Bearer";
 
-		// Gerando token de autenticação e adicionando ao cabeçalho e resposta Http
-		public void addAuthentication(HttpServletResponse response, String username) throws IOException {
+	private static final String HEADER_STRING = "Authorization";
 
-			// Montagem do Token
-			String JWT = Jwts.builder() // gerador de token
-					.setSubject(username) // adiciona usuário
-					.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // tempo expiração
-					.signWith(SignatureAlgorithm.HS512, SECRET) // algoritmo de geração de senha
-					.compact(); // compactação String
+	// Gerando token de autenticação e adicionando ao cabeçalho e resposta Http
+	public void addAuthentication(HttpServletResponse response, String username) throws IOException {
 
-			String token = TOKEN_PREFIX + " " + JWT; // Bearer 3498hih345jkh345ui53iu5hyi
+		// Montagem do Token
+		String JWT = Jwts.builder() // gerador de token
+				.setSubject(username) // adiciona usuário
+				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // tempo expiração
+				.signWith(SignatureAlgorithm.HS512, SECRET) // algoritmo de geração de senha
+				.compact(); // compactação String
 
-			// adiciona token no cabeçalho http
-			response.addHeader(HEADER_STRING, token); // Authorization: Bearer 3498hih345jkh345ui53iu5hyi
+		String token = TOKEN_PREFIX + " " + JWT; // Bearer 3498hih345jkh345ui53iu5hyi
 
-			liberarCORS(response);
+		// adiciona token no cabeçalho http
+		response.addHeader(HEADER_STRING, token); // Authorization: Bearer 3498hih345jkh345ui53iu5hyi
 
-			// adiciona token como resposta no corpo do http
-			response.getWriter().write("{\"Authorization\": \"" + token + "\"}");
-		}
+		liberarCORS(response);
 
-		// Retorna o usuário validado com token ou caso não seja válido retorna null
-		public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) {
+		// adiciona token como resposta no corpo do http
+		response.getWriter().write("{\"Authorization\": \"" + token + "\"}");
+	}
 
-			// Pega o token enviado no cabeçalho Http
-			String token = request.getHeader(HEADER_STRING);
+	// Retorna o usuário validado com token ou caso não seja válido retorna null
+	public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+
+		// Pega o token enviado no cabeçalho Http
+		String token = request.getHeader(HEADER_STRING);
+
+		try {
 
 			if (token != null) {
-				
+
 				String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
-				
+
 				// Faz validação do Token do usuário na requisição
-				String user = Jwts.parser()
-						.setSigningKey(SECRET)
-						.parseClaimsJws(tokenLimpo)
-						.getBody()
-						.getSubject();
+				String user = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(tokenLimpo).getBody().getSubject();
 
 				if (user != null) {
-					Usuario usuario = ApplicationContextLoad
-							.getApplicationContext()
-							.getBean(UsuarioRepository.class)
+					Usuario usuario = ApplicationContextLoad.getApplicationContext().getBean(UsuarioRepository.class)
 							.findUserByLogin(user);
 
 					if (usuario != null) {
-						return new UsernamePasswordAuthenticationToken(
-								usuario.getLogin(),
-								usuario.getSenha(),
+						return new UsernamePasswordAuthenticationToken(usuario.getLogin(), usuario.getSenha(),
 								usuario.getAuthorities());
 					}
 				}
 			}
-			liberarCORS(response);
-			return null;
+
+		} catch (SignatureException e) {
+			response.getWriter().write("Token está inválido");
+		} catch (ExpiredJwtException ex) {
+			response.getWriter().write("Token está expirado, Realize o login novamente.");
+		} finally {
+			liberarCORS(response); // executa mesmo se não ter excessão
+		}
+		return null;
+	}
+
+	// CORS policy
+	private void liberarCORS(HttpServletResponse response) {
+		if (response.getHeader("Access-Control-Allow-Origin") == null) {
+			response.addHeader("Access-Control-Allow-Origin", "*");
 		}
 
-		// CORS policy
-		private void liberarCORS(HttpServletResponse response) {
-			if (response.getHeader("Access-Control-Allow-Origin") == null) {
-				response.addHeader("Access-Control-Allow-Origin", "*");
-			}
-
-			if (response.getHeader("Access-Control-Allow-Headers") == null) {
-				response.addHeader("Access-Control-Allow-Headers", "*");
-			}
-
-			if (response.getHeader("Access-Control-Request-Headers") == null) {
-				response.addHeader("Access-Control-Request-Headers", "*");
-			}
-
-			if (response.getHeader("Access-Control-Allow-Methods") == null) {
-				response.addHeader("Access-Control-Allow-Methods", "*");
-			}
+		if (response.getHeader("Access-Control-Allow-Headers") == null) {
+			response.addHeader("Access-Control-Allow-Headers", "*");
 		}
+
+		if (response.getHeader("Access-Control-Request-Headers") == null) {
+			response.addHeader("Access-Control-Request-Headers", "*");
+		}
+
+		if (response.getHeader("Access-Control-Allow-Methods") == null) {
+			response.addHeader("Access-Control-Allow-Methods", "*");
+		}
+	}
 
 }
