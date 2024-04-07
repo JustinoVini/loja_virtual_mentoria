@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jdev.mentoria.lojavirtual.ExceptionMentoriaJava;
 import jdev.mentoria.lojavirtual.model.Acesso;
 import jdev.mentoria.lojavirtual.repository.AcessoRepository;
 import jdev.mentoria.lojavirtual.service.AcessoService;
@@ -27,39 +27,42 @@ public class AcessoController {
 	@Autowired
 	private AcessoRepository acessoRepository;
 
-	@PostMapping("**/salvarAcesso")
-	@ResponseBody
-	public ResponseEntity<Acesso> salvar(@RequestBody Acesso acesso) {
-		var acessoNovo = acessoService.save(acesso);
-		return new ResponseEntity<>(acessoNovo, HttpStatus.OK);
+	@PostMapping(value = "**/salvarAcesso")
+	public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) throws ExceptionMentoriaJava {
+		if (acesso.getId() == null) {
+			List<Acesso> acessos = acessoRepository.buscarAcessoDesc(acesso.getDescricao().toUpperCase());
+			if (!acessos.isEmpty()) {
+				throw new ExceptionMentoriaJava("Já existe acesso com a descrição: " + acesso.getDescricao());
+			}
+		}
+
+		Acesso acessoSalvo = acessoService.save(acesso);
+		return new ResponseEntity<>(acessoSalvo, HttpStatus.OK);
 	}
 
-	@PostMapping("**/deleteAcesso")
-	@ResponseBody
-	public ResponseEntity<Acesso> deletaAcesso(@RequestBody Acesso acesso) {
+	@PostMapping(value = "**/deleteAcesso")
+	public ResponseEntity<String> deleteAcesso(@RequestBody Acesso acesso) {
 		acessoRepository.deleteById(acesso.getId());
-		return new ResponseEntity("Acesso removido", HttpStatus.OK);
+		return new ResponseEntity<>("Acesso removido com sucesso!", HttpStatus.OK);
 	}
 
-	@DeleteMapping("**/deleteAcessoPorId/{id}")
-	@ResponseBody
-	public ResponseEntity<?> deletaAcessoPorId(@PathVariable("id") Long id) {
+	@DeleteMapping(value = "**/deleteAcessoPorId/{id}")
+	public ResponseEntity<String> deleteAcessoPorId(@PathVariable("id") Long id) {
 		acessoRepository.deleteById(id);
-		return new ResponseEntity("Acesso removido", HttpStatus.OK);
+		return new ResponseEntity<>("Acesso removido com sucesso!", HttpStatus.OK);
 	}
-	
-	@GetMapping("**/obterAcesso/{id}")
-	@ResponseBody
-	public ResponseEntity<Acesso> obterAcesso(@PathVariable("id") Long id) {
-		var acesso = acessoRepository.findById(id).get();
-		return new ResponseEntity<Acesso>(acesso, HttpStatus.OK);
+
+	@GetMapping(value = "**/obterAcessoPorId/{id}")
+	public ResponseEntity<Acesso> pesquisarPorId(@PathVariable("id") Long id) throws ExceptionMentoriaJava {
+		Acesso acesso = acessoRepository.findById(id)
+				.orElseThrow(() -> new ExceptionMentoriaJava("Acesso com o id " + id + " não encontrado!"));
+		return new ResponseEntity<>(acesso, HttpStatus.OK);
 	}
-	
-	@GetMapping("**/buscarPorDescricao/{desc}")
-	@ResponseBody
-	public ResponseEntity<List<Acesso>> buscarPorDescricao(@PathVariable("desc") String desc) {
-		List<Acesso> acessos = acessoRepository.findAcessoByDescricao(desc);
-		return new ResponseEntity<List<Acesso>>(acessos, HttpStatus.OK);
+
+	@GetMapping(value = "**/obterAcessoPorDescricao/{desc}")
+	public ResponseEntity<List<Acesso>> pesquisarPorDescricao(@PathVariable("desc") String desc) {
+		List<Acesso> acessos = acessoRepository.buscarAcessoDesc(desc.toUpperCase());
+		return new ResponseEntity<>(acessos, HttpStatus.OK);
 	}
 
 }
