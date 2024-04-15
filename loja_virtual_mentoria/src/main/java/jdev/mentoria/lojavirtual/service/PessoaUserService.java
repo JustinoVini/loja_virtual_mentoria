@@ -1,6 +1,7 @@
 package jdev.mentoria.lojavirtual.service;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,13 @@ public class PessoaUserService {
 	private JdbcTemplate jdbcTemplate;
 	
 	public PessoaJuridica salvarPessoaJuridica(PessoaJuridica pessoaJuridica) {
+		
+		// pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+		
+		for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
+			pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
+			pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
+		}
 		
 		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
 		
