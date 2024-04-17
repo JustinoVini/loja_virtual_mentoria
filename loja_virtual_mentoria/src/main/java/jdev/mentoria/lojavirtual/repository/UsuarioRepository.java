@@ -38,4 +38,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query(value = "INSERT INTO usuarios_acesso(usuario_id, acesso_id) values (?1, (select id from acesso where descricao = ?2 limit 1))", nativeQuery = true)
 	void insereAcessoUserPj(Long idUser, String acesso);
 
+	@Transactional
+	@Modifying
+	@Query(value = "INSERT INTO usuarios_acesso(usuario_id, acesso_id) VALUES (?1, (SELECT id FROM acesso WHERE descricao = 'ROLE_USER'))", nativeQuery = true)
+	void insereAcessoUser(Long idUser);
+
 }
