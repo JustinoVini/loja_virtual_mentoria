@@ -5,14 +5,19 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jdev.mentoria.lojavirtual.ExceptionMentoriaJava;
+import jdev.mentoria.lojavirtual.dto.CepDTO;
+import jdev.mentoria.lojavirtual.model.Endereco;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
+import jdev.mentoria.lojavirtual.repository.EnderecoRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
 import jdev.mentoria.lojavirtual.service.PessoaUserService;
 import jdev.mentoria.lojavirtual.util.ValidaCNPJ;
@@ -26,6 +31,15 @@ public class PessoaController {
 	
 	@Autowired
 	private PessoaUserService pessoaUserService;
+	
+	@Autowired
+	private EnderecoRepository enderecoRepository;
+	
+	@ResponseBody
+	@GetMapping("**/consultaCep/{cep}")
+	public ResponseEntity<CepDTO> consultaCep(@PathVariable("cep") String cep) {
+		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
+	}
 	
 	@PostMapping(value = "**/salvarPj")
 	@ResponseBody
@@ -45,6 +59,21 @@ public class PessoaController {
 		
 		if (!ValidaCNPJ.isCNPJ(pessoaJuridica.getCnpj())) {
 			throw new ExceptionMentoriaJava("CNPJ : " + pessoaJuridica.getCnpj() + " Está inválido.");
+		}
+		
+		if (pessoaJuridica.getId() == null || pessoaJuridica.getId() <= 0) {
+			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) { // percorrendo os endereços para consulta do cep
+				populaCep(pessoaJuridica, p);
+			}
+		} else {
+			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
+				Endereco enderecoTempo = enderecoRepository.findById(pessoaJuridica.getEnderecos().get(p).getId()).get();
+				
+				if (!enderecoTempo.getCep().equals(pessoaJuridica.getEnderecos().get(p).getCep())) {
+					populaCep(pessoaJuridica, p);
+				}
+				
+			}
 		}
 		
 		pessoaJuridica = pessoaUserService.salvarPessoaJuridica(pessoaJuridica);
@@ -72,5 +101,14 @@ public class PessoaController {
 		
 		return new ResponseEntity<PessoaFisica>(pessoaFisica, HttpStatus.OK);
 	}
+	
+	private void populaCep(PessoaJuridica pessoaJuridica, int index) {
+        CepDTO cepDTO = pessoaUserService.consultaCep(pessoaJuridica.getEnderecos().get(index).getCep());
+        pessoaJuridica.getEnderecos().get(index).setBairro(cepDTO.getBairro());
+        pessoaJuridica.getEnderecos().get(index).setCidade(cepDTO.getLocalidade());
+        pessoaJuridica.getEnderecos().get(index).setComplemento(cepDTO.getComplemento());
+        pessoaJuridica.getEnderecos().get(index).setRuaLogra(cepDTO.getLogradouro());
+        pessoaJuridica.getEnderecos().get(index).setUf(cepDTO.getUf());
+    }	
 
 }

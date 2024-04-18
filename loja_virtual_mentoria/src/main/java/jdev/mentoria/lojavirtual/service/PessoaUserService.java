@@ -1,14 +1,14 @@
 package jdev.mentoria.lojavirtual.service;
 
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import jdev.mentoria.lojavirtual.dto.CepDTO;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
@@ -67,8 +67,7 @@ public class PessoaUserService {
 			usuarioPj.setSenha(senhaCript);
 
 			usuarioPj = usuarioRepository.save(usuarioPj);
-
-			usuarioRepository.insereAcessoUserPj(usuarioPj.getId());
+			
 			usuarioRepository.insereAcessoUserPj(usuarioPj.getId(), "ROLE_ADMIN");
 
 			StringBuilder mensagemHtml = new StringBuilder();
@@ -142,6 +141,10 @@ public class PessoaUserService {
 		}
 
 		return pessoaFisica;
+	}
+	
+	public CepDTO consultaCep(String cep) {
+		return new RestTemplate().getForEntity("https://viacep.com.br/ws/" + cep +  "/json/", CepDTO.class).getBody();
 	}
 
 }

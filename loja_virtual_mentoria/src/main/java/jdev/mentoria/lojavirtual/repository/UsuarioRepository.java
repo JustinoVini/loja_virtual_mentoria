@@ -27,15 +27,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 			+ "WHERE table_name = 'usuarios_acesso'\n" + "AND column_name = 'acesso_id'\n"
 			+ "AND constraint_name <> 'unique_acesso_user'", nativeQuery = true)
 	String consultaConstraintAcesso();
-
-	@Transactional
-	@Modifying
-	@Query(value = "INSERT INTO usuarios_acesso(usuario_id, acesso_id) values (?1, (select id from acesso where descricao = 'ROLE_USER'))", nativeQuery = true)
-	void insereAcessoUserPj(Long idUser);
 	
 	@Transactional
 	@Modifying
-	@Query(value = "INSERT INTO usuarios_acesso(usuario_id, acesso_id) values (?1, (select id from acesso where descricao = ?2 limit 1))", nativeQuery = true)
+	@Query(value = "INSERT INTO usuarios_acesso(usuario_id, acesso_id) VALUES (?1, (SELECT id FROM acesso WHERE descricao = ?2 limit 1))", nativeQuery = true)
 	void insereAcessoUserPj(Long idUser, String acesso);
 
 	@Transactional
