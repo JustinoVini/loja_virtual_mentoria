@@ -84,7 +84,7 @@ public class TestePessoaUsuario extends TestCase {
 	
 	@Test
 	void testCadPessoaFisica() throws ExceptionMentoriaJava {
-		PessoaJuridica pessoaJuridica = pessoaRepository.existsByCnpj("50327290000153");
+		PessoaJuridica pessoaJuridica = pessoaRepository.existeCnpjCadastrado("50327290000153");
 
 		PessoaFisica pessoaFisica = new PessoaFisica();
 		pessoaFisica.setCpf("178.497.830-26");
