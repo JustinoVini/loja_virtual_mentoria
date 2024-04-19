@@ -1,4 +1,4 @@
-package jdbcTemplate;
+package jdev.mentoria.lojavirtual.service;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
