@@ -17,7 +17,6 @@ import jdev.mentoria.lojavirtual.model.Acesso;
 import jdev.mentoria.lojavirtual.repository.AcessoRepository;
 import jdev.mentoria.lojavirtual.service.AcessoService;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 @RestController
 public class AcessoController {
 
@@ -31,11 +30,13 @@ public class AcessoController {
 	public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) throws ExceptionMentoriaJava {
 		if (acesso.getId() == null) {
 			List<Acesso> acessos = acessoRepository.buscarAcessoDesc(acesso.getDescricao().toUpperCase());
+			
 			if (!acessos.isEmpty()) {
 				throw new ExceptionMentoriaJava("Já existe acesso com a descrição: " + acesso.getDescricao());
 			}
+			
 		}
-
+		
 		Acesso acessoSalvo = acessoService.save(acesso);
 		return new ResponseEntity<>(acessoSalvo, HttpStatus.OK);
 	}
