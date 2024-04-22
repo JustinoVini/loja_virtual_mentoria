@@ -6,7 +6,6 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jdev.mentoria.lojavirtual.ExceptionMentoriaJava;
 import jdev.mentoria.lojavirtual.dto.CepDTO;
+import jdev.mentoria.lojavirtual.dto.ConsultaCnpjDTO;
+import jdev.mentoria.lojavirtual.enums.TipoPessoa;
 import jdev.mentoria.lojavirtual.model.Endereco;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
@@ -89,12 +90,22 @@ public class PessoaController {
 		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
 	}
 	
+	@ResponseBody
+	@GetMapping("**/consultaCnpjReceitaws/{cnpj}")
+	public ResponseEntity<ConsultaCnpjDTO> consultaCnpj(@PathVariable("cnpj") String cnpj) {
+		return new ResponseEntity<ConsultaCnpjDTO>(pessoaUserService.consultaCnpjReceitaWS(cnpj), HttpStatus.OK);
+	}
+	
 	@PostMapping(value = "**/salvarPj")
 	@ResponseBody
 	public ResponseEntity<PessoaJuridica> salvarPj(@RequestBody @Valid PessoaJuridica pessoaJuridica) throws ExceptionMentoriaJava {
 		
 		if (pessoaJuridica == null) {
 			throw new ExceptionMentoriaJava("Pessoa Juridica não pode ser nula.");
+		}
+		
+		if (pessoaJuridica.getTipoPessoa() == null) {
+			throw new ExceptionMentoriaJava("Informe o tipo jurídico ou Fornecedor da loja");
 		}
 		
 		if (pessoaJuridica.getId() == null && pessoaRepository.existeCnpjCadastrado(pessoaJuridica.getCnpj()) != null) {
@@ -135,6 +146,10 @@ public class PessoaController {
 		
 		if (pessoaFisica == null) {
 			throw new ExceptionMentoriaJava("Pessoa Juridica não pode ser nula.");
+		}
+		
+		if (pessoaFisica.getTipoPessoa() == null) {
+			pessoaFisica.setTipoPessoa(TipoPessoa.FISICA.name());
 		}
 		
 		if (pessoaFisica.getId() == null && pessoaFisicaRepository.existeCpfCadastrado(pessoaFisica.getCpf()) != null) {

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import jdev.mentoria.lojavirtual.dto.CepDTO;
+import jdev.mentoria.lojavirtual.dto.ConsultaCnpjDTO;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
@@ -145,6 +146,10 @@ public class PessoaUserService {
 	
 	public CepDTO consultaCep(String cep) {
 		return new RestTemplate().getForEntity("https://viacep.com.br/ws/" + cep +  "/json/", CepDTO.class).getBody();
+	}
+	
+	public ConsultaCnpjDTO consultaCnpjReceitaWS(String cnpj) {
+		return new RestTemplate().getForEntity("https://receitaws.com.br/v1/cnpj/" + cnpj, ConsultaCnpjDTO.class).getBody();
 	}
 
 }
