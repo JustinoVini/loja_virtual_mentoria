@@ -19,6 +19,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "nota_fiscal_compra")
@@ -47,6 +48,7 @@ public class NotaFiscalCompra implements Serializable {
 
 	private BigDecimal valorDesconto;
 
+	// @Size(min = 1, message = "Informe o valor do ICMS maior que 1 Real")
 	@NotNull(message = "Informe o valor do ICMS")
 	@Column(nullable = false)
 	private BigDecimal valorIcms;
