@@ -13,7 +13,7 @@ import jdev.mentoria.lojavirtual.model.NotaFiscalCompra;
 @Repository
 public interface NotaFiscalCompraRepository extends JpaRepository<NotaFiscalCompra, Long> {
 
-	@Query("SELECT a FROM NotaFiscalCompra a WHERE UPPER(TRIM(a.descricaoObservacao)) LIKE %?1%")
+	@Query("SELECT a FROM NotaFiscalCompra a WHERE UPPER(TRIM(a.descricaoObs)) LIKE %?1%")
 	List<NotaFiscalCompra> buscarNotaPorDescricao(String descricao);
 
 	@Query(value = "select count(1) > 0 from nota_fiscal_compra where upper(descricao_obs) like %?1%", nativeQuery = true)
